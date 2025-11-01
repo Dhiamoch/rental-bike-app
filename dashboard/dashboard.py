@@ -6,9 +6,9 @@ import streamlit as st
 st.set_page_config(layout="wide")
 #load data
 def load_data():
-    day_df = pd.read_csv("day_df.csv")
-    hour_df = pd.read_csv("hour_df.csv")
-    day_hour_df = pd.read_csv("day_hour_df.csv")
+    day_df = pd.read_csv("dashboard/day_df.csv")
+    hour_df = pd.read_csv("dashboard/hour_df.csv")
+    day_hour_df = pd.read_csv("dashboard/day_hour_df.csv")
     
     #convert data dtedta ke datetime
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
