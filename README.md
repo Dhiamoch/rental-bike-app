@@ -14,6 +14,7 @@ Analisis dilakukan di Jupyter Notebook (`notebook.ipynb`) dan disertai dashboard
 - `dashboard/` — Streamlit app (`dashboard.py`).
 - `day_df.csv`, `hour_df.csv`, `day_hour_df.csv` — Output data
 - `requirements.txt` — daftar dependensi untuk environment.
+- `app-streamlit.py` - digunakan untuk deploy app di streamlit
 
 ## Langkah analisis
 
@@ -42,7 +43,7 @@ Jika menggunakan conda :
 3. Buka `notebook.ipynb` dan jalankan sel-selnya secara berurutan. Notebook menulis tiga file output: `day_df.csv`, `hour_df.csv`, `day_hour_df.csv`.
 4. Pindahkan ke-3 file output ke folder dashboard
 
-## Menjalankan dashboard Streamlit
+## Menjalankan dashboard Streamlit di lokal
 
 Setelah menjalankan notebook
 
