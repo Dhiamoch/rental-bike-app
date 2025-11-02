@@ -16,10 +16,76 @@ def load_data():
 
 day_df, hour_df = load_data()
 
+orig_day_df = day_df.copy()
+orig_hour_df = hour_df.copy()
+
+# Sidebar filters
+with st.sidebar:
+    st.header("Filters")
+
+    min_date = orig_day_df['dteday'].min().date()
+    max_date = orig_day_df['dteday'].max().date()
+    date_range = st.date_input("Rentang Tanggal", value=[min_date, max_date])
+    if not isinstance(date_range, (list, tuple)):
+        date_range = [date_range, date_range]
+
+    musim_sel = st.multiselect("Musim", options=sorted(orig_day_df['musim'].unique()), default=sorted(orig_day_df['musim'].unique()))
+    year_options = sorted(orig_day_df['yr'].unique())
+    year_map = {0: 2011, 1: 2012}
+    yr_sel = st.multiselect("Tahun", options=year_options, format_func=lambda x: str(year_map.get(x, x)), default=year_options)
+    holiday_opt = st.selectbox("Libur (holiday)", options=["All", "Yes", "No"], index=0)
+    working_opt = st.selectbox("Working Day", options=["All", "Yes", "No"], index=0)
+
+# Apply filters to create filtered DataFrames
+day_df_filtered = orig_day_df.copy()
+hour_df_filtered = orig_hour_df.copy()
+
+# Date filter 
+with st.spinner('Memfilter data berdasarkan rentang tanggal...'):
+    if len(date_range) == 2:
+        start_date, end_date = date_range[0], date_range[1]
+        day_df_filtered = day_df_filtered[(day_df_filtered['dteday'].dt.date >= start_date) & (day_df_filtered['dteday'].dt.date <= end_date)]
+        hour_df_filtered = hour_df_filtered[(hour_df_filtered['dteday'].dt.date >= start_date) & (hour_df_filtered['dteday'].dt.date <= end_date)]
+    elif len(date_range) == 1:
+        single_date = date_range[0]
+        day_df_filtered = day_df_filtered[day_df_filtered['dteday'].dt.date == single_date]
+        hour_df_filtered = hour_df_filtered[hour_df_filtered['dteday'].dt.date == single_date]
+
+# Musim
+if musim_sel:
+    day_df_filtered = day_df_filtered[day_df_filtered['musim'].isin(musim_sel)]
+    if 'musim' in hour_df_filtered.columns:
+        hour_df_filtered = hour_df_filtered[hour_df_filtered['musim'].isin(musim_sel)]
+
+# Tahun
+if yr_sel:
+    day_df_filtered = day_df_filtered[day_df_filtered['yr'].isin(yr_sel)]
+    hour_df_filtered = hour_df_filtered[hour_df_filtered['yr'].isin(yr_sel)]
+
+
+# Holiday
+if holiday_opt == 'Yes':
+    day_df_filtered = day_df_filtered[day_df_filtered['holiday'] == 1]
+    hour_df_filtered = hour_df_filtered[hour_df_filtered['holiday'] == 1]
+elif holiday_opt == 'No':
+    day_df_filtered = day_df_filtered[day_df_filtered['holiday'] == 0]
+    hour_df_filtered = hour_df_filtered[hour_df_filtered['holiday'] == 0]
+
+# Working day
+if working_opt == 'Yes':
+    day_df_filtered = day_df_filtered[day_df_filtered['workingday'] == 1]
+    hour_df_filtered = hour_df_filtered[hour_df_filtered['workingday'] == 1]
+elif working_opt == 'No':
+    day_df_filtered = day_df_filtered[day_df_filtered['workingday'] == 0]
+    hour_df_filtered = hour_df_filtered[hour_df_filtered['workingday'] == 0]
+
+day_df = day_df_filtered
+hour_df = hour_df_filtered
+
 #difine warna
 colors = {'low': '#1f77b4', 'medium': '#ff7f0e', 'high': '#d62728'}
 
-st.title("Dashboard Analisa Rental Sepeda pada tahun 2011-2012 🚲 ")
+st.title("Dashboard Rental Sepeda 🚲 ")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -53,12 +119,6 @@ plt.tight_layout()
 
 st.pyplot(fig)
 
-# Markdown hasil anaslisa Permintaan Jasa Rental Sepeda per-Hari
-with st.expander("📊 Hasil Analisa"):
-    st.markdown("""
-    - Terdapat peningkatan yang signifikan dari tahun **2011 ke 2012**  
-    - Pola musiman terlihat jelas, dengan **permintaan tertinggi pada musim Fall** dan **terendah pada musim Spring**  
-    """)
 
 
 # Diagram heatmap 
@@ -78,20 +138,8 @@ ax.set_xlabel('Hari (0-6 = Minggu–Sabtu)', labelpad=10)
 ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
 st.pyplot(fig)
 
-# Markdown hasil anaslisa Permintaan Jasa Rental Sepeda per-Hari
-with st.expander("📊 Hasil Analisa"):
-    st.markdown("""
-    - **Weekday (Senin–Jumat):**  
-      * Terdapat dua puncak penggunaan: **pagi hari (08:00)** dan **sore hari (17:00–18:00)**  
 
-    - **Weekend (Sabtu–Minggu):**  
-      * Pola penggunaan lebih **merata sepanjang 10:00–18:00**  
-    """)
-
-
-
-
-st.subheader("Analisis Pengguna Rental Sepeda Berdasarkan Musim dan Tipe Pengguna")
+st.subheader("Pengguna berdasarkan Musim dan Tipe Pengguna")
 col1, col2 = st.columns(2)
 
 # Bar chart total pengguna per-musim
@@ -128,16 +176,6 @@ with col2:
 
     st.pyplot(fig2)
 
-# Markdown hasil anaslisa Distribusi total pengguna per-musim & Pengguna Berdasarkan Tipe
-with st.expander("📊 Hasil Analisa"):
-    st.markdown("""
-    - Total pengguna per musim menunjukkan pola yang jelas:  
-      * **Tertinggi pada musim Fall**  
-      * **Terendah pada musim Spring** 
-    
-    - Pengguna terbanyak berasal dari **pengguna Registered**  
- 
-    """)
 
 #Diagram bar untuk total pengguna casual per-hari
 st.subheader("Total Pengguna Casual per Hari")
@@ -176,11 +214,3 @@ ax.set_ylabel('Jumlah Pengguna', labelpad=8)
 ax.ticklabel_format(style='plain', axis='y')  
 
 st.pyplot(fig)
-
-# Markdown hasil anaslisa total pengguna per-hari pada casual, registred dan total pengguna
-with st.expander("📊 Hasil Analisa"):
-    st.markdown("""
-    - Total pengguna **casual** harian **tinggi pada waktu weekend**  
-    - Total pengguna **registered** menunjukkan pola yang **berbanding terbalik**,  
-      di mana **permintaan tertinggi terjadi pada weekday**
-    """)
