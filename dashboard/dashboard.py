@@ -10,23 +10,20 @@ def load_data():
 
     # Baca file CSV dengan path relatif
     day_df = pd.read_csv(os.path.join(base_path, "day_df.csv"))
-    day_hour_df = pd.read_csv(os.path.join(base_path, "day_hour_df.csv"))
     hour_df = pd.read_csv(os.path.join(base_path, "hour_df.csv"))
 
     # Konversi kolom tanggal ke datetime
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
-    day_hour_df['dteday'] = pd.to_datetime(day_hour_df['dteday'])
     hour_df['dteday'] = pd.to_datetime(hour_df['dteday'])
 
     return day_df, day_hour_df, hour_df
 
 
 # Panggil fungsi load_data
-day_df, day_hour_df, hour_df = load_data()
+day_df,hour_df = load_data()
 
 # Simpan salinannya untuk referensi
 orig_day_df = day_df.copy()
-orig_day_hour_df = day_hour_df.copy()
 orig_hour_df = hour_df.copy()
 
 # Sidebar filters
