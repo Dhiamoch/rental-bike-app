@@ -16,7 +16,7 @@ def load_data():
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
     hour_df['dteday'] = pd.to_datetime(hour_df['dteday'])
 
-    return day_df, day_hour_df, hour_df
+    return day_df, hour_df
 
 
 # Panggil fungsi load_data
